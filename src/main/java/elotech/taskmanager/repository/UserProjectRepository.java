@@ -7,4 +7,7 @@ import elotech.taskmanager.entity.UserProjectId;
 
 public interface UserProjectRepository extends JpaRepository<UserProject, UserProjectId> {
 
+    boolean existsByUser_IdAndProject_Id(Long userId, Long projectId);
+
+    long deleteByUser_IdAndProject_Id(Long userId, Long projectId);
 }
