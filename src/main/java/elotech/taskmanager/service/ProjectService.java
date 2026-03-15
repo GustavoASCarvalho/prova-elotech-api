@@ -1,9 +1,10 @@
 ﻿package elotech.taskmanager.service;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
+import elotech.taskmanager.dto.common.response.PagedResponse;
 import elotech.taskmanager.dto.project.request.ProjectCreateRequest;
 import elotech.taskmanager.dto.project.request.ProjectUpdateRequest;
 import elotech.taskmanager.dto.project.response.ProjectResponse;
@@ -28,8 +29,15 @@ public class ProjectService {
     private final UserRepository userRepository;
     private final UserProjectRepository userProjectRepository;
 
-    public List<ProjectResponse> findAll() {
-        return projectRepository.findAll().stream().map(this::toDto).toList();
+    public PagedResponse<ProjectResponse> findAll(Integer page, Integer size) {
+        int currentPage = (page == null || page < 0) ? 0 : page;
+        int pageSize = (size == null || size <= 0) ? 20 : Math.min(size, 200);
+
+        Page<ProjectResponse> projectPage = projectRepository
+                .findAll(PageRequest.of(currentPage, pageSize))
+                .map(this::toDto);
+
+        return PagedResponse.from(projectPage);
     }
 
     public ProjectResponse findById(Long id) {

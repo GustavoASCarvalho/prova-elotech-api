@@ -1,16 +1,15 @@
 ﻿package elotech.taskmanager.service;
 
 import java.util.EnumMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.stereotype.Service;
 
+import elotech.taskmanager.dto.common.response.PagedResponse;
 import elotech.taskmanager.dto.task.request.TaskCreateRequest;
 import elotech.taskmanager.dto.task.request.TaskListFiltersRequest;
 import elotech.taskmanager.dto.task.request.TaskUpdateRequest;
@@ -70,38 +69,38 @@ public class TaskService {
                 .build();
     }
 
-    public List<TaskResponse> searchByText(String text, Integer limit) {
+    public PagedResponse<TaskResponse> searchByText(String text, Integer page, Integer size) {
         if (text == null || text.isBlank()) {
             throw new BadRequestException("Search text is required");
         }
-        int size = (limit == null || limit <= 0) ? 20 : Math.min(limit, 100);
+        int currentPage = (page == null || page < 0) ? 0 : page;
+        int pageSize = (size == null || size <= 0) ? 20 : Math.min(size, 100);
         Long currentUserId = getCurrentUserId();
-        Set<Long> seenTaskIds = new HashSet<>();
 
-        return taskRepository.searchByTextForUser(currentUserId, text.trim(), PageRequest.of(0, size))
-                .stream()
-                .filter(task -> seenTaskIds.add(task.getId()))
-                .limit(size)
-                .map(this::toDto)
-                .toList();
+        Page<TaskResponse> taskPage = taskRepository
+                .searchByTextForUser(currentUserId, text.trim(), PageRequest.of(currentPage, pageSize))
+                .map(this::toDto);
+
+        return PagedResponse.from(taskPage);
     }
 
-    public List<TaskResponse> findAll(TaskListFiltersRequest filters) {
+    public PagedResponse<TaskResponse> findAll(TaskListFiltersRequest filters) {
         Long currentUserId = getCurrentUserId();
-        int size = (filters.limit() == null || filters.limit() <= 0) ? 50 : Math.min(filters.limit(), 200);
+        int currentPage = (filters.page() == null || filters.page() < 0) ? 0 : filters.page();
+        int pageSize = (filters.size() == null || filters.size() <= 0) ? 50 : Math.min(filters.size(), 200);
         Sort sort = buildSort(filters.sortBy(), filters.sortDir());
 
-        return taskRepository.findAllByFiltersForUser(
+        Page<TaskResponse> taskPage = taskRepository.findAllByFiltersForUser(
                 currentUserId,
                 filters.status(),
                 filters.priority(),
                 filters.assigneeId(),
                 filters.deadlineFrom(),
                 filters.deadlineTo(),
-                PageRequest.of(0, size, sort))
-                .stream()
-                .map(this::toDto)
-                .toList();
+                PageRequest.of(currentPage, pageSize, sort))
+                .map(this::toDto);
+
+        return PagedResponse.from(taskPage);
     }
 
     public TaskResponse findById(Long id) {

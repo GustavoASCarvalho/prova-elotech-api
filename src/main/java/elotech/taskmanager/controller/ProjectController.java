@@ -1,7 +1,5 @@
 package elotech.taskmanager.controller;
 
-import java.util.List;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,9 +8,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import elotech.taskmanager.dto.common.response.PagedResponse;
 import elotech.taskmanager.dto.project.request.ProjectCreateRequest;
 import elotech.taskmanager.dto.project.request.ProjectUpdateRequest;
 import elotech.taskmanager.dto.project.response.ProjectResponse;
@@ -37,8 +37,10 @@ public class ProjectController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Lista de projetos retornada com sucesso")
     })
-    public List<ProjectResponse> findAll() {
-        return projectService.findAll();
+    public PagedResponse<ProjectResponse> findAll(
+            @RequestParam(required = false, defaultValue = "0") Integer page,
+            @RequestParam(required = false, defaultValue = "20") Integer size) {
+        return projectService.findAll(page, size);
     }
 
     @GetMapping("/{id}")
