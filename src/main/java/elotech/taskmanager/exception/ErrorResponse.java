@@ -1,4 +1,4 @@
-﻿package elotech.taskmanager.exception;
+package elotech.taskmanager.exception;
 
 import java.time.LocalDateTime;
 

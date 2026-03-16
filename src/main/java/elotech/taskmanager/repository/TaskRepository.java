@@ -1,4 +1,4 @@
-﻿package elotech.taskmanager.repository;
+package elotech.taskmanager.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;

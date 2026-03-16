@@ -74,6 +74,8 @@ public class GlobalExceptionHandler {
                 ErrorResponse response = buildResponse("INTERNAL_ERROR", HttpStatus.INTERNAL_SERVER_ERROR,
                                 "Unexpected internal error",
                                 request.getRequestURI());
+                System.out.println("Unexpected error: " + ex.getMessage());
+                System.out.println("stack trace: " + ex.getStackTrace());
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
 

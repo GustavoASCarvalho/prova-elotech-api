@@ -1,4 +1,4 @@
-﻿package elotech.taskmanager.service;
+package elotech.taskmanager.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;

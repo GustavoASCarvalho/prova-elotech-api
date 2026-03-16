@@ -1,14 +1,15 @@
 ﻿package elotech.taskmanager.service;
 
-import java.util.EnumMap;
 import java.util.Locale;
 
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.stereotype.Service;
 
+import elotech.taskmanager.config.cache.CacheConfig;
 import elotech.taskmanager.dto.common.response.PagedResponse;
 import elotech.taskmanager.dto.task.request.TaskCreateRequest;
 import elotech.taskmanager.dto.task.request.TaskListFiltersRequest;
@@ -42,31 +43,12 @@ public class TaskService {
     private final ProjectRepository projectRepository;
     private final UserProjectRepository userProjectRepository;
     private final UserRepository userRepository;
+    private final TaskCacheService taskSummaryCacheService;
 
     public TaskSummaryResponse getProjectSummary(Long projectId) {
         ensureMembership(projectId);
         Long currentUserId = getCurrentUserId();
-
-        EnumMap<TaskStatusEnum, Long> byStatus = new EnumMap<>(TaskStatusEnum.class);
-        for (TaskStatusEnum status : TaskStatusEnum.values()) {
-            byStatus.put(status, 0L);
-        }
-
-        EnumMap<PriorityEnum, Long> byPriority = new EnumMap<>(PriorityEnum.class);
-        for (PriorityEnum priority : PriorityEnum.values()) {
-            byPriority.put(priority, 0L);
-        }
-
-        taskRepository.countByStatusForProjectAndUser(projectId, currentUserId)
-                .forEach(item -> byStatus.put(item.getStatus(), item.getTotal()));
-
-        taskRepository.countByPriorityForProjectAndUser(projectId, currentUserId)
-                .forEach(item -> byPriority.put(item.getPriority(), item.getTotal()));
-
-        return TaskSummaryResponse.builder()
-                .byStatus(byStatus)
-                .byPriority(byPriority)
-                .build();
+        return taskSummaryCacheService.getProjectSummaryCached(projectId, currentUserId);
     }
 
     public PagedResponse<TaskResponse> searchByText(String text, Integer page, Integer size) {
@@ -110,12 +92,14 @@ public class TaskService {
         return toDto(task);
     }
 
+    @CacheEvict(cacheNames = CacheConfig.PROJECT_SUMMARY_CACHE, allEntries = true)
     public TaskResponse create(TaskCreateRequest dto) {
         Task task = new Task();
         applyCreateRequest(dto, task);
         return toDto(taskRepository.save(task));
     }
 
+    @CacheEvict(cacheNames = CacheConfig.PROJECT_SUMMARY_CACHE, allEntries = true)
     public TaskResponse update(Long id, TaskUpdateRequest dto) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(TASK_NOT_FOUND));
@@ -124,6 +108,7 @@ public class TaskService {
         return toDto(taskRepository.save(task));
     }
 
+    @CacheEvict(cacheNames = CacheConfig.PROJECT_SUMMARY_CACHE, allEntries = true)
     public void delete(Long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(TASK_NOT_FOUND));
