@@ -12,10 +12,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
@@ -50,8 +50,12 @@ class ProjectServiceTest {
     @Mock
     private UserProjectRepository userProjectRepository;
 
-    @InjectMocks
     private ProjectService projectService;
+
+    @BeforeEach
+    void setUp() {
+        projectService = new ProjectServiceImpl(projectRepository, userRepository, userProjectRepository);
+    }
 
     @AfterEach
     void tearDown() {

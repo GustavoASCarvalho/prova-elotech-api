@@ -14,10 +14,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
@@ -65,8 +65,17 @@ class TaskServiceTest {
     @Mock
     private TaskCacheService taskSummaryCacheService;
 
-    @InjectMocks
     private TaskService taskService;
+
+    @BeforeEach
+    void setUp() {
+        taskService = new TaskServiceImpl(
+                taskRepository,
+                projectRepository,
+                userProjectRepository,
+                userRepository,
+                taskSummaryCacheService);
+    }
 
     @AfterEach
     void tearDown() {
