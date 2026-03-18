@@ -7,6 +7,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.JpaSort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import elotech.taskmanager.config.cache.CacheConfig;
@@ -71,18 +72,43 @@ public class TaskServiceImpl implements TaskService {
         int currentPage = (filters.page() == null || filters.page() < 0) ? 0 : filters.page();
         int pageSize = (filters.size() == null || filters.size() <= 0) ? 50 : Math.min(filters.size(), 200);
         Sort sort = buildSort(filters.sortBy(), filters.sortDir());
+        Specification<Task> specification = buildFiltersSpecification(currentUserId, filters);
 
-        Page<TaskResponse> taskPage = taskRepository.findAllByFiltersForUser(
-                currentUserId,
-                filters.status(),
-                filters.priority(),
-                filters.assigneeId(),
-                filters.deadlineFrom(),
-                filters.deadlineTo(),
-                PageRequest.of(currentPage, pageSize, sort))
+        Page<TaskResponse> taskPage = taskRepository
+                .findAll(specification, PageRequest.of(currentPage, pageSize, sort))
                 .map(this::toDto);
 
         return PagedResponse.from(taskPage);
+    }
+
+    private Specification<Task> buildFiltersSpecification(Long currentUserId, TaskListFiltersRequest filters) {
+        return (root, query, criteriaBuilder) -> {
+            query.distinct(true);
+
+            var projectJoin = root.join("project");
+            var membershipsJoin = projectJoin.join("memberships");
+            var predicates = new java.util.ArrayList<jakarta.persistence.criteria.Predicate>();
+
+            predicates.add(criteriaBuilder.equal(membershipsJoin.get("user").get("id"), currentUserId));
+
+            if (filters.status() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("status"), filters.status()));
+            }
+            if (filters.priority() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("priority"), filters.priority()));
+            }
+            if (filters.assigneeId() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("assignee").get("id"), filters.assigneeId()));
+            }
+            if (filters.deadlineFrom() != null) {
+                predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("deadline"), filters.deadlineFrom()));
+            }
+            if (filters.deadlineTo() != null) {
+                predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("deadline"), filters.deadlineTo()));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
     }
 
     public TaskResponse findById(Long id) {

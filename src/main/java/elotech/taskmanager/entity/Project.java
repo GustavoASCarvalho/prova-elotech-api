@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.envers.Audited;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -20,6 +22,7 @@ import lombok.Setter;
 @Table(name = "projects", indexes = {
         @Index(name = "idx_projects_owner", columnList = "owner_id")
 })
+@Audited
 @Getter
 @Setter
 public class Project extends BaseEntity {

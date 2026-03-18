@@ -2,6 +2,8 @@ package elotech.taskmanager.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.envers.Audited;
+
 import elotech.taskmanager.enums.PriorityEnum;
 import elotech.taskmanager.enums.TaskStatusEnum;
 import jakarta.persistence.Column;
@@ -23,6 +25,7 @@ import lombok.Setter;
         @Index(name = "idx_tasks_status", columnList = "status"),
         @Index(name = "idx_tasks_deadline", columnList = "deadline")
 })
+@Audited
 @Getter
 @Setter
 public class Task extends BaseEntity {

@@ -3,6 +3,9 @@ package elotech.taskmanager.entity;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+
 import elotech.taskmanager.enums.UserRoleEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,6 +18,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "users")
+@Audited
 @Getter
 @Setter
 public class User extends BaseEntity {
@@ -26,6 +30,7 @@ public class User extends BaseEntity {
     private String email;
 
     @Column(nullable = false, length = 255)
+    @NotAudited
     private String password;
 
     @Enumerated(EnumType.STRING)

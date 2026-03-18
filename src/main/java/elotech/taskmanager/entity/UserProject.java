@@ -1,5 +1,7 @@
 package elotech.taskmanager.entity;
 
+import org.hibernate.envers.Audited;
+
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -12,6 +14,7 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "user_projects")
+@Audited
 @Getter
 @Setter
 @NoArgsConstructor
