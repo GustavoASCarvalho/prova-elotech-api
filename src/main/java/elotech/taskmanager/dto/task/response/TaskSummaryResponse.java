@@ -4,16 +4,15 @@ import java.util.Map;
 
 import elotech.taskmanager.enums.PriorityEnum;
 import elotech.taskmanager.enums.TaskStatusEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class TaskSummaryResponse {
-    private Map<TaskStatusEnum, Long> byStatus;
-    private Map<PriorityEnum, Long> byPriority;
+public record TaskSummaryResponse(
+        Map<TaskStatusEnum, Long> byStatus,
+        Map<PriorityEnum, Long> byPriority) {
+    public Map<TaskStatusEnum, Long> getByStatus() {
+        return byStatus;
+    }
+
+    public Map<PriorityEnum, Long> getByPriority() {
+        return byPriority;
+    }
 }

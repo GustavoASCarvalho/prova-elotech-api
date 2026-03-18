@@ -36,9 +36,6 @@ public class TaskCacheServiceImpl implements TaskCacheService {
         taskRepository.countByPriorityForProjectAndUser(projectId, currentUserId)
                 .forEach(item -> byPriority.put(item.getPriority(), item.getTotal()));
 
-        return TaskSummaryResponse.builder()
-                .byStatus(byStatus)
-                .byPriority(byPriority)
-                .build();
+        return new TaskSummaryResponse(byStatus, byPriority);
     }
 }

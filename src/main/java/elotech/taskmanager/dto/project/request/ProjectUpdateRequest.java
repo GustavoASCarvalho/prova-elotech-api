@@ -2,23 +2,11 @@ package elotech.taskmanager.dto.project.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class ProjectUpdateRequest {
+public record ProjectUpdateRequest(
+        @NotBlank(message = "name is required") @Size(max = 150, message = "name must have at most 150 characters") String name,
 
-    @NotBlank(message = "name is required")
-    @Size(max = 150, message = "name must have at most 150 characters")
-    private String name;
+        @Size(max = 1000, message = "description must have at most 1000 characters") String description,
 
-    @Size(max = 1000, message = "description must have at most 1000 characters")
-    private String description;
-
-    private Long ownerId;
+        Long ownerId) {
 }

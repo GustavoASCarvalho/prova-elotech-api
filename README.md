@@ -16,72 +16,29 @@ docker compose up -d
 http://localhost:8080/swagger-ui.html
 ```
 
-3. H2 Console:
-
-```text
-http://localhost:8080/h2-console
-```
-
-4. Rodar testes:
+3. Rodar testes:
 
 ```bash
-./mvnw test
+mvn test
 ```
-
-## Fluxo rapido de uso
-
-1. Registrar usuario:
-
-```http
-POST /api/auth/register
-```
-
-2. Login:
-
-```http
-POST /api/auth/login
-```
-
-3. Copiar o token retornado e enviar no header:
-
-```text
-Authorization: Bearer <token>
-```
-
-4. Usar endpoints de projetos e tarefas via Swagger.
 
 ## Decisoes tecnicas e tradeoffs
 
-1. Arquitetura em camadas (`controller -> service -> repository`).
-   Tradeoff: simples de manter e testar, mas pode crescer com mais classes em regras complexas.
+1. Arquitetura em camadas (controller -> service -> repository).
+   Tradeoff: separa bem responsabilidades e facilita manutencao/testes, não escala tão bem quanto clean arquiteture em projetos grandes.
 
-2. JWT stateless com Spring Security.
-   Tradeoff: escalavel e sem sessao no servidor, mas exige cuidado com expiracao e revogacao de token.
+2. Cache no endpoint de resumo por projeto.
+   Decisao: leitura de resumo e uma operacao recorrente e agregada, entao foi aplicada estrategia de cache para reduzir consultas repetidas.
+   Tradeoff: melhora performance em leitura, mas exige invalidacao correta a cada escrita para evitar dado desatualizado.
 
-3. Regras de negocio centralizadas nos services (WIP limit, transicao de status, regra de CRITICAL).
-   Tradeoff: regra fica explicita e testavel, mas services ficam maiores.
-
-4. H2 em memoria para simplificar avaliacao.
-   Tradeoff: setup rapido, mas nao representa todos os cenarios de producao (PostgreSQL seria mais realista).
-
-5. Cache no resumo por projeto com invalidacao em escritas de tarefa.
-   Tradeoff: melhora leitura, mas aumenta complexidade de coerencia de cache.
-
-6. DTOs de request/response e handler global de excecoes.
-   Tradeoff: contratos mais claros e respostas padronizadas, em troca de mais codigo de mapeamento.
+3. Historico de alteracoes com Hibernate Envers.
+   Decisao: manter trilha automatica de versoes das entidades auditadas sem implementar tabela de auditoria manual.
+   Tradeoff: entrega rapida de rastreabilidade (quem/quando/o que mudou), porem aumenta volume de dados no banco e custo de manutencao/consulta historica.
 
 ## O que eu faria diferente com mais tempo
 
-1. Migrar erro padronizado para ProblemDetail (RFC 7807) em todos os cenarios.
-2. Adicionar testes E2E de fluxo critico (login -> criar projeto -> criar tarefa -> atualizar status).
-3. Melhorar observabilidade (logs estruturados e correlacao de requisicoes).
-4. Adicionar perfil de producao com PostgreSQL e migracoes versionadas.
-5. Refatorar alguns services em componentes menores de dominio para reduzir acoplamento.
-
-## Cobertura do desafio (resumo)
-
-1. Autenticacao/autorizacao com perfis ADMIN e MEMBER.
-2. CRUD de projetos e tarefas com regras de negocio exigidas.
-3. Filtros, ordenacao, busca textual e relatorio resumido.
-4. Swagger/OpenAPI disponivel.
-5. Testes unitarios (services) e de integracao com SpringBootTest.
+1. Reestruturar o historico de alteracoes para um modelo mais aderente aos requisitos de negocio.
+2. Evoluir o registro de historico para um fluxo assíncrono (fila + banco NoSQL) para nao impactar o tempo de resposta da API transacional.
+3. Melhorar a observabilidade com logs estruturados, correlacao de requisicoes, metricas e dashboards.
+4. Criar mais rotas orientadas ao consumo do front para reduzir transformacoes no cliente.
+5. Ampliar os testes de fluxos criticos com cenarios de ponta a ponta (ex.: autenticacao, autorizacao, transicoes de status e regras de WIP).

@@ -143,33 +143,33 @@ public class TaskServiceImpl implements TaskService {
     }
 
     private void applyCreateRequest(TaskCreateRequest dto, Task task) {
-        Project project = resolveProject(dto.getProjectId());
-        User assignee = resolveAssignee(dto.getAssigneeId(), project.getId());
+        Project project = resolveProject(dto.projectId());
+        User assignee = resolveAssignee(dto.assigneeId(), project.getId());
 
-        validateWipLimit(project.getId(), assignee, dto.getStatus(), null);
+        validateWipLimit(project.getId(), assignee, dto.status(), null);
 
-        task.setTitle(dto.getTitle());
-        task.setDescription(dto.getDescription());
-        task.setStatus(dto.getStatus());
-        task.setPriority(dto.getPriority());
-        task.setDeadline(dto.getDeadline());
+        task.setTitle(dto.title());
+        task.setDescription(dto.description());
+        task.setStatus(dto.status());
+        task.setPriority(dto.priority());
+        task.setDeadline(dto.deadline());
         task.setProject(project);
         task.setAssignee(assignee);
     }
 
     private void applyUpdateRequest(TaskUpdateRequest dto, Task task) {
-        Project project = resolveProject(dto.getProjectId());
-        User assignee = resolveAssignee(dto.getAssigneeId(), project.getId());
+        Project project = resolveProject(dto.projectId());
+        User assignee = resolveAssignee(dto.assigneeId(), project.getId());
 
-        validateStatusTransition(task.getStatus(), dto.getStatus());
-        validateCriticalClosePermission(task, dto.getStatus(), dto.getPriority(), project);
-        validateWipLimit(project.getId(), assignee, dto.getStatus(), task.getId());
+        validateStatusTransition(task.getStatus(), dto.status());
+        validateCriticalClosePermission(task, dto.status(), dto.priority(), project);
+        validateWipLimit(project.getId(), assignee, dto.status(), task.getId());
 
-        task.setTitle(dto.getTitle());
-        task.setDescription(dto.getDescription());
-        task.setStatus(dto.getStatus());
-        task.setPriority(dto.getPriority());
-        task.setDeadline(dto.getDeadline());
+        task.setTitle(dto.title());
+        task.setDescription(dto.description());
+        task.setStatus(dto.status());
+        task.setPriority(dto.priority());
+        task.setDeadline(dto.deadline());
         task.setProject(project);
         task.setAssignee(assignee);
     }
@@ -290,15 +290,14 @@ public class TaskServiceImpl implements TaskService {
     }
 
     private TaskResponse toDto(Task task) {
-        return TaskResponse.builder()
-                .id(task.getId())
-                .title(task.getTitle())
-                .description(task.getDescription())
-                .projectId(task.getProject() != null ? task.getProject().getId() : null)
-                .assigneeId(task.getAssignee() != null ? task.getAssignee().getId() : null)
-                .status(task.getStatus())
-                .priority(task.getPriority())
-                .deadline(task.getDeadline())
-                .build();
+        return new TaskResponse(
+                task.getId(),
+                task.getTitle(),
+                task.getDescription(),
+                task.getProject() != null ? task.getProject().getId() : null,
+                task.getAssignee() != null ? task.getAssignee().getId() : null,
+                task.getStatus(),
+                task.getPriority(),
+                task.getDeadline());
     }
 }

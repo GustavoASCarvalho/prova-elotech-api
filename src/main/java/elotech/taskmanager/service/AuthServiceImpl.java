@@ -30,13 +30,13 @@ public class AuthServiceImpl implements AuthService {
         public AuthResponse login(LoginRequest request) {
                 try {
                         authenticationManager.authenticate(
-                                        new UsernamePasswordAuthenticationToken(request.getEmail(),
-                                                        request.getPassword()));
+                                        new UsernamePasswordAuthenticationToken(request.email(),
+                                                        request.password()));
                 } catch (AuthenticationException ex) {
                         throw new BadRequestException("Invalid email or password");
                 }
 
-                User user = userRepository.findByEmail(request.getEmail())
+                User user = userRepository.findByEmail(request.email())
                                 .orElseThrow(() -> new BadRequestException("Invalid email or password"));
 
                 String token = jwtService.generateToken(
@@ -47,24 +47,23 @@ public class AuthServiceImpl implements AuthService {
                                                 .build(),
                                 Map.of("role", user.getRole().name(), "userId", user.getId()));
 
-                return AuthResponse.builder()
-                                .token(token)
-                                .tokenType("Bearer")
-                                .userId(user.getId())
-                                .email(user.getEmail())
-                                .role(user.getRole().name())
-                                .build();
+                return new AuthResponse(
+                                token,
+                                "Bearer",
+                                user.getId(),
+                                user.getEmail(),
+                                user.getRole().name());
         }
 
         public AuthResponse register(RegisterRequest request) {
-                if (userRepository.existsByEmail(request.getEmail())) {
+                if (userRepository.existsByEmail(request.email())) {
                         throw new BadRequestException("Email is already in use");
                 }
 
                 User user = new User();
-                user.setName(request.getName());
-                user.setEmail(request.getEmail());
-                user.setPassword(passwordEncoder.encode(request.getPassword()));
+                user.setName(request.name());
+                user.setEmail(request.email());
+                user.setPassword(passwordEncoder.encode(request.password()));
                 user.setRole(UserRoleEnum.MEMBER);
                 User savedUser = userRepository.save(user);
 
@@ -76,12 +75,11 @@ public class AuthServiceImpl implements AuthService {
                                                 .build(),
                                 Map.of("role", savedUser.getRole().name(), "userId", savedUser.getId()));
 
-                return AuthResponse.builder()
-                                .token(token)
-                                .tokenType("Bearer")
-                                .userId(savedUser.getId())
-                                .email(savedUser.getEmail())
-                                .role(savedUser.getRole().name())
-                                .build();
+                return new AuthResponse(
+                                token,
+                                "Bearer",
+                                savedUser.getId(),
+                                savedUser.getEmail(),
+                                savedUser.getRole().name());
         }
 }

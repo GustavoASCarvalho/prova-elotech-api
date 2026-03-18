@@ -23,6 +23,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -91,7 +93,7 @@ class TaskServiceTest {
     void getProjectSummaryShouldReturnCachedDataWhenUserIsMember() {
         setAuthenticatedUser("user@email.com");
         User currentUser = buildUser(1L, "user@email.com", UserRoleEnum.MEMBER);
-        TaskSummaryResponse cached = TaskSummaryResponse.builder().build();
+        TaskSummaryResponse cached = new TaskSummaryResponse(null, null);
 
         when(userRepository.findByEmail("user@email.com")).thenReturn(Optional.of(currentUser));
         when(userProjectRepository.existsByUser_IdAndProject_Id(1L, 10L)).thenReturn(true);
@@ -557,8 +559,7 @@ class TaskServiceTest {
         when(userRepository.findByEmail("user@email.com")).thenReturn(Optional.of(currentUser));
 
         Page<Task> emptyPage = new PageImpl<>(List.of(), PageRequest.of(0, 50), 0);
-        when(taskRepository.findAllByFiltersForUser(anyLong(), any(), any(), any(), any(), any(),
-                any(PageRequest.class)))
+        when(taskRepository.findAll(any(Specification.class), any(Pageable.class)))
                 .thenReturn(emptyPage);
 
         TaskListFiltersRequest filters = new TaskListFiltersRequest(
@@ -574,8 +575,8 @@ class TaskServiceTest {
 
         taskService.findAll(filters);
 
-        ArgumentCaptor<PageRequest> captor = ArgumentCaptor.forClass(PageRequest.class);
-        verify(taskRepository).findAllByFiltersForUser(anyLong(), any(), any(), any(), any(), any(), captor.capture());
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(taskRepository).findAll(any(Specification.class), captor.capture());
         assertEquals(0, captor.getValue().getPageNumber());
         assertEquals(50, captor.getValue().getPageSize());
     }
@@ -587,8 +588,7 @@ class TaskServiceTest {
         when(userRepository.findByEmail("user@email.com")).thenReturn(Optional.of(currentUser));
 
         Page<Task> emptyPage = new PageImpl<>(List.of(), PageRequest.of(0, 20), 0);
-        when(taskRepository.findAllByFiltersForUser(anyLong(), any(), any(), any(), any(), any(),
-                any(PageRequest.class)))
+        when(taskRepository.findAll(any(Specification.class), any(Pageable.class)))
                 .thenReturn(emptyPage);
 
         TaskListFiltersRequest filters = new TaskListFiltersRequest(
@@ -604,8 +604,8 @@ class TaskServiceTest {
 
         taskService.findAll(filters);
 
-        ArgumentCaptor<PageRequest> captor = ArgumentCaptor.forClass(PageRequest.class);
-        verify(taskRepository).findAllByFiltersForUser(anyLong(), any(), any(), any(), any(), any(), captor.capture());
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(taskRepository).findAll(any(Specification.class), captor.capture());
         assertEquals("DESC", captor.getValue().getSort().iterator().next().getDirection().name());
     }
 
@@ -616,8 +616,7 @@ class TaskServiceTest {
         when(userRepository.findByEmail("user@email.com")).thenReturn(Optional.of(currentUser));
 
         Page<Task> emptyPage = new PageImpl<>(List.of(), PageRequest.of(0, 20), 0);
-        when(taskRepository.findAllByFiltersForUser(anyLong(), any(), any(), any(), any(), any(),
-                any(PageRequest.class)))
+        when(taskRepository.findAll(any(Specification.class), any(Pageable.class)))
                 .thenReturn(emptyPage);
 
         TaskListFiltersRequest filters = new TaskListFiltersRequest(
@@ -633,8 +632,8 @@ class TaskServiceTest {
 
         taskService.findAll(filters);
 
-        ArgumentCaptor<PageRequest> captor = ArgumentCaptor.forClass(PageRequest.class);
-        verify(taskRepository).findAllByFiltersForUser(anyLong(), any(), any(), any(), any(), any(), captor.capture());
+        ArgumentCaptor<Pageable> captor = ArgumentCaptor.forClass(Pageable.class);
+        verify(taskRepository).findAll(any(Specification.class), captor.capture());
         assertEquals("createdAt: ASC", captor.getValue().getSort().toString());
     }
 

@@ -1,18 +1,28 @@
 package elotech.taskmanager.dto.auth.response;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+public record AuthResponse(
+        String token,
+        String tokenType,
+        Long userId,
+        String email,
+        String role) {
+    public String getToken() {
+        return token;
+    }
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class AuthResponse {
-    private String token;
-    private String tokenType;
-    private Long userId;
-    private String email;
-    private String role;
+    public String getTokenType() {
+        return tokenType;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getRole() {
+        return role;
+    }
 }

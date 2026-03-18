@@ -49,8 +49,8 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectResponse create(ProjectCreateRequest dto) {
         User currentUser = getCurrentUser();
         Project project = new Project();
-        project.setName(dto.getName());
-        project.setDescription(dto.getDescription());
+        project.setName(dto.name());
+        project.setDescription(dto.description());
         project.setOwner(currentUser);
         Project savedProject = projectRepository.save(project);
 
@@ -62,7 +62,7 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectResponse update(Long id, ProjectUpdateRequest dto) {
         Project project = projectRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(PROJECT_NOT_FOUND));
-        applyFields(dto.getName(), dto.getDescription(), dto.getOwnerId(), project);
+        applyFields(dto.name(), dto.description(), dto.ownerId(), project);
         return toDto(projectRepository.save(project));
     }
 
@@ -142,11 +142,10 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     private ProjectResponse toDto(Project project) {
-        return ProjectResponse.builder()
-                .id(project.getId())
-                .name(project.getName())
-                .description(project.getDescription())
-                .ownerId(project.getOwner() != null ? project.getOwner().getId() : null)
-                .build();
+        return new ProjectResponse(
+                project.getId(),
+                project.getName(),
+                project.getDescription(),
+                project.getOwner() != null ? project.getOwner().getId() : null);
     }
 }

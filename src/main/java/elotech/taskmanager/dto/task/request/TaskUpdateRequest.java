@@ -7,34 +7,19 @@ import elotech.taskmanager.enums.TaskStatusEnum;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class TaskUpdateRequest {
+public record TaskUpdateRequest(
+        @NotBlank(message = "title is required") @Size(max = 200, message = "title must have at most 200 characters") String title,
 
-    @NotBlank(message = "title is required")
-    @Size(max = 200, message = "title must have at most 200 characters")
-    private String title;
+        @Size(max = 2000, message = "description must have at most 2000 characters") String description,
 
-    @Size(max = 2000, message = "description must have at most 2000 characters")
-    private String description;
+        @NotNull(message = "projectId is required") Long projectId,
 
-    @NotNull(message = "projectId is required")
-    private Long projectId;
+        Long assigneeId,
 
-    private Long assigneeId;
+        @NotNull(message = "status is required") TaskStatusEnum status,
 
-    @NotNull(message = "status is required")
-    private TaskStatusEnum status;
+        @NotNull(message = "priority is required") PriorityEnum priority,
 
-    @NotNull(message = "priority is required")
-    private PriorityEnum priority;
-
-    private LocalDateTime deadline;
+        LocalDateTime deadline) {
 }
